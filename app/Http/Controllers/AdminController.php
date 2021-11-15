@@ -20,9 +20,9 @@ class AdminController extends Controller
             if (!is_null($sigupAdmin)) {
                 return response()->json(array('token' => $sigupAdmin), 200);
             }
-            return Response()->json(array('status' => 'error', 'message' => 'Login incorrecto'), 400);
+            return Response()->json(array('status' => 'error', 'message' => 'Login incorrecto','code'=>400), 200);
         } else {
-            return Response()->json(array('status' => 'error', 'message' => 'Faltan datos'), 400);
+            return Response()->json(array('status' => 'error', 'message' => 'Faltan datos','code'=>400), 200);
         }
     }
 }

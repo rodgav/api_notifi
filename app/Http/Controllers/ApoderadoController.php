@@ -19,7 +19,7 @@ class ApoderadoController extends Controller
             $sigupAdmin = $jwtAuth->singupApoderado($correo, $password);
                 return response()->json($sigupAdmin, 200);
         } else {
-            return Response()->json(array('status' => 'error', 'message' => 'Faltan datos'), 400);
+            return Response()->json(array('status' => 'error', 'message' => 'Faltan datos','code'=>400), 200);
         }
     }
 }

@@ -3,6 +3,7 @@
 namespace App\Http\Controllers;
 
 use App\Helpers\JwtAuth;
+use App\Models\Admin;
 use App\Models\Niveles;
 use Illuminate\Http\Request;
 
@@ -15,7 +16,9 @@ class NivelesController extends Controller
         $checkToken = $jwtAuth->checkToken($token);
         if (is_null($checkToken)) {
             $niveles = Niveles::all();
-            return response()->json(array('niveles' => $niveles, 'status' => 'success'), 200);
+            //$niveles = Admin::query()->offset(0)->limit(25)->orderBy('created_at','asc')->get();
+            //$niveles = Niveles::query()->where(array('name'=>'Preescolar'))->get();
+            return response()->json(array('niveles' => $niveles, 'status' => 'success', 'message' => 'Niveles encontrados', 'code' => 200), 200);
         } else {
             return response()->json($checkToken, 200);
         }

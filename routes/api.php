@@ -4,6 +4,7 @@ use App\Http\Controllers\AdminController;
 use App\Http\Controllers\ApoderadoController;
 use App\Http\Controllers\NivelesController;
 use App\Http\Controllers\RefreshController;
+use App\Http\Controllers\Sub_NivelController;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Route;
 
@@ -26,3 +27,4 @@ Route::post('loginAdmin',[AdminController::class,'login']);
 Route::get('niveles',[NivelesController::class,'getNiveles']);
 Route::post('loginApoderado',[ApoderadoController::class,'login']);
 Route::post('refresh',[RefreshController::class,'refresh']);
+Route::get('subniveles',[Sub_NivelController::class,'getSubNiveles']);

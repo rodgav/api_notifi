@@ -89,7 +89,7 @@ class JwtAuth
         }
     }
 
-    public function checkToken($jwt)
+    public function checkToken($jwt) : ?array
     {
         try {
             $decode = JWT::decode($jwt, $this->key, array('HS256'));
@@ -98,22 +98,22 @@ class JwtAuth
                 if (!is_null($token)) {
                     $today = time();
                     if ($decode->exp <= $today) {
-                        return array('status' => 'error', 'message' => 'Token expiro');
+                        return array('status' => 'error', 'message' => 'Token expiro','code'=>400);
                     } else {
                         return null;
                     }
                 } else {
-                    return array('status' => 'error', 'message' => 'Token no encontrado');
+                    return array('status' => 'error', 'message' => 'Token no encontrado','code'=>400);
                 }
             } else {
-                return array('status' => 'error', 'message' => 'Token invalido');
+                return array('status' => 'error', 'message' => 'Token invalido','code'=>400);
             }
         } catch (\UnexpectedValueException | \DomainException $e) {
-            return array('status' => 'error', 'message' => 'Token invalido');
+            return array('status' => 'error', 'message' => 'Token invalido','code'=>400);
         }
     }
 
-    public function refresh($jwt)
+    public function refresh($jwt) : array
     {
         try {
             $decode = JWT::decode($jwt, $this->key, array('HS256'));
