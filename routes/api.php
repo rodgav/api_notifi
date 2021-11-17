@@ -2,6 +2,7 @@
 
 use App\Http\Controllers\AdminController;
 use App\Http\Controllers\ApoderadoController;
+use App\Http\Controllers\EstudiantesController;
 use App\Http\Controllers\NivelesController;
 use App\Http\Controllers\RefreshController;
 use App\Http\Controllers\Sub_NivelController;
@@ -23,8 +24,17 @@ Route::middleware('auth:sanctum')->get('/user', function (Request $request) {
     return $request->user();
 });
 
-Route::post('loginAdmin',[AdminController::class,'login']);
-Route::get('niveles',[NivelesController::class,'getNiveles']);
-Route::post('loginApoderado',[ApoderadoController::class,'login']);
-Route::post('refresh',[RefreshController::class,'refresh']);
-Route::get('subniveles',[Sub_NivelController::class,'getSubNiveles']);
+Route::post('loginAdmin', [AdminController::class, 'login']);
+Route::get('niveles', [NivelesController::class, 'getNiveles']);
+Route::get('nivel', [NivelesController::class, 'getNivel']);
+Route::post('loginApoderado', [ApoderadoController::class, 'login']);
+Route::post('refresh', [RefreshController::class, 'refresh']);
+Route::get('subniveles', [Sub_NivelController::class, 'getSubNiveles']);
+Route::get('subnivel', [Sub_NivelController::class, 'getSubNivel']);
+Route::get('estudiantesNoApoderado', [EstudiantesController::class, 'getEstudiantesNoApoderado']);
+Route::get('estudiantesApoderado', [EstudiantesController::class, 'getEstudiantesApoderado']);
+Route::post('estudiante', [EstudiantesController::class, 'create']);
+Route::get('apoderados', [ApoderadoController::class, 'getApoderados']);
+Route::get('apoderadosName', [ApoderadoController::class, 'getApoderadosLastName']);
+Route::post('apoderado', [ApoderadoController::class, 'create']);
+Route::put('apoderado/{id}', [ApoderadoController::class, 'update']);

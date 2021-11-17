@@ -17,12 +17,9 @@ class AdminController extends Controller
         $password = (!is_null($json) && isset($params->password)) ? $params->password : null;
         if (!is_null($correo) && !is_null($password)) {
             $sigupAdmin = $jwtAuth->singupAdmin($correo, $password);
-            if (!is_null($sigupAdmin)) {
-                return response()->json(array('token' => $sigupAdmin), 200);
-            }
-            return Response()->json(array('status' => 'error', 'message' => 'Login incorrecto','code'=>400), 200);
+            return response()->json($sigupAdmin, 200);
         } else {
-            return Response()->json(array('status' => 'error', 'message' => 'Faltan datos','code'=>400), 200);
+            return Response()->json(array('status' => 'error', 'message' => 'Faltan datos', 'code' => 400), 200);
         }
     }
 }

@@ -24,4 +24,19 @@ class Sub_NivelController extends Controller
             return response()->json($checkToken, 200);
         }
     }
+
+    public function getSubNivel(Request $request)
+    {
+        $token = $request->header('Authorization', null);
+        $jwtAuth = new JwtAuth();
+        //recuperamos idSubNivel
+        $idSubNivel = $request->query('idSubNivel');
+        $checkToken = $jwtAuth->checkToken($token);
+        if (is_null($checkToken)) {
+            $subNivel = Sub_Nivel::query()->where(array('id' => $idSubNivel))->first();
+            return response()->json(array('sub_nivel' => $subNivel, 'status' => 'success', 'message' => 'Sub-Nivel encontrado', 'code' => 200), 200);
+        } else {
+            return response()->json($checkToken, 200);
+        }
+    }
 }

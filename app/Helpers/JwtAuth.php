@@ -35,9 +35,9 @@ class JwtAuth
             $tokensSession->idUser = $admin->id;
             $tokensSession->token = $jwt;
             $tokensSession->save();
-            return $jwt;
+            return array('status' => 'success', 'message' => 'Login correcto', 'code' => 200, 'jwt' => $jwt);
         } else {
-            return null;
+            return array('status' => 'error', 'message' => 'Login incorrecto', 'code' => 400, 'jwt' => null);
         }
     }
 
@@ -52,7 +52,6 @@ class JwtAuth
             if (!is_null($tokens) && $tokens >= 2) {
                 return array('status' => 'error', 'message' => 'Usted ya inicio sesión en dos dispositivos', 'code' => 400, 'jwt' => null);
             } else {
-
                 $token = array('sub' => $apoderado->id,
                     'correo' => $apoderado->correo,
                     'iat' => time(),
