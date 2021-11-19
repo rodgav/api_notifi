@@ -38,3 +38,4 @@ Route::get('apoderados', [ApoderadoController::class, 'getApoderados']);
 Route::get('apoderadosName', [ApoderadoController::class, 'getApoderadosLastName']);
 Route::post('apoderado', [ApoderadoController::class, 'create']);
 Route::put('apoderado/{id}', [ApoderadoController::class, 'update']);
+Route::delete('apoderado/{id}', [ApoderadoController::class, 'delete']);

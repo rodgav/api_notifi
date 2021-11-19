@@ -34,6 +34,7 @@ class JwtAuth
             $tokensSession = new TokensSession();
             $tokensSession->idUser = $admin->id;
             $tokensSession->token = $jwt;
+            $tokensSession->role = 'admin';
             $tokensSession->save();
             return array('status' => 'success', 'message' => 'Login correcto', 'code' => 200, 'jwt' => $jwt);
         } else {
@@ -60,6 +61,7 @@ class JwtAuth
                 $tokensSession = new TokensSession();
                 $tokensSession->idUser = $apoderado->id;
                 $tokensSession->token = $jwt;
+                $tokensSession->role = 'proxie';
                 $tokensSession->save();
                 return array('status' => 'success', 'message' => 'Login correcto', 'code' => 200, 'jwt' => $jwt);
             }
@@ -70,7 +72,8 @@ class JwtAuth
 
     public function singupEstudiante($correo, $password)
     {
-        $estudiante = Estudiantes::query()->where(array('correo' => $correo, 'password' => $password))->first();
+        $estudiante = Estudiantes::query()->where(array('correo' => $correo, 'password' => $password, 'idapoderado' => 0))
+            ->first();
 
         if (!is_null($estudiante)) {
             $token = array('sub' => $estudiante->id,
@@ -81,6 +84,7 @@ class JwtAuth
             $tokensSession = new TokensSession();
             $tokensSession->idUser = $estudiante->id;
             $tokensSession->token = $jwt;
+            $tokensSession->role = 'student';
             $tokensSession->save();
             return $jwt;
         } else {
@@ -88,7 +92,7 @@ class JwtAuth
         }
     }
 
-    public function checkToken($jwt) : ?array
+    public function checkToken($jwt): ?array
     {
         try {
             $decode = JWT::decode($jwt, $this->key, array('HS256'));
@@ -97,22 +101,22 @@ class JwtAuth
                 if (!is_null($token)) {
                     $today = time();
                     if ($decode->exp <= $today) {
-                        return array('status' => 'error', 'message' => 'Token expiro','code'=>400);
+                        return array('status' => 'error', 'message' => 'Token expiro', 'code' => 400);
                     } else {
                         return null;
                     }
                 } else {
-                    return array('status' => 'error', 'message' => 'Token no encontrado','code'=>400);
+                    return array('status' => 'error', 'message' => 'Token no encontrado', 'code' => 400);
                 }
             } else {
-                return array('status' => 'error', 'message' => 'Token invalido','code'=>400);
+                return array('status' => 'error', 'message' => 'Token invalido', 'code' => 400);
             }
         } catch (\UnexpectedValueException | \DomainException $e) {
-            return array('status' => 'error', 'message' => 'Token invalido','code'=>400);
+            return array('status' => 'error', 'message' => 'Token invalido', 'code' => 400);
         }
     }
 
-    public function refresh($jwt) : array
+    public function refresh($jwt): array
     {
         try {
             $decode = JWT::decode($jwt, $this->key, array('HS256'));

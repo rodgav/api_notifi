@@ -1,25 +1,29 @@
 create table admin
 (
-    id         int primary key                     not null,
-    correo     varchar(50)                         not null,
-    password   varchar(50)                         not null,
+    id         int auto_increment primary key      not null,
+    correo     varchar(100)                        not null,
+    password   varchar(100)                        not null,
     created_at timestamp default current_timestamp not null,
     updated_at timestamp default current_timestamp not null
 );
 
 insert into admin (id, correo, password)
-VALUES (1, 'prueba@gmail.com', '12345678');
+    value (1, 'prueba@gmail.com', '12345678');
 
 create table apoderado
 (
-    id         int primary key                     not null,
-    name       varchar(20)                         not null,
-    lastname   varchar(20)                         not null,
-    correo     varchar(50)                         not null,
-    password   varchar(50)                         not null,
+    id         int auto_increment primary key      not null,
+    name       varchar(100)                        not null,
+    lastname   varchar(100)                        not null,
+    correo     varchar(100)                        not null,
+    password   varchar(100)                        not null,
     created_at timestamp default current_timestamp not null,
     updated_at timestamp default current_timestamp not null
 );
+
+insert into apoderado (id, name, lastname, correo, password)
+VALUES (0, '', '', '', '');
+
 insert into apoderado (id, name, lastname, correo, password)
 VALUES (1, 'Katia', 'Garcia', 'katia@gmail.com', '12345678');
 
@@ -42,7 +46,7 @@ create table tokenSession
 create table niveles
 (
     id         int primary key                     not null,
-    name       varchar(20)                         not null,
+    name       varchar(100)                        not null,
     created_at timestamp default current_timestamp not null,
     updated_at timestamp default current_timestamp not null
 );
@@ -55,9 +59,9 @@ values (1, 'Preescolar'),
 
 create table sub_nivel
 (
-    id         int primary key                     not null,
+    id         int auto_increment primary key      not null,
     idNivel    int                                 not null,
-    name       varchar(20)                         not null,
+    name       varchar(100)                        not null,
     created_at timestamp default current_timestamp not null,
     updated_at timestamp default current_timestamp not null
 );
@@ -93,12 +97,12 @@ values (1, 1, 'Primero'),
 
 create table estudiantes
 (
-    id          int primary key                     not null,
-    idapoderado int                                 not null,
-    name        varchar(20)                         not null,
-    lastname    varchar(20)                         not null,
-    correo      varchar(50)                         not null,
-    password    varchar(50)                         not null,
+    id          int auto_increment primary key      not null,
+    idapoderado int       default 0                 not null,
+    name        varchar(100)                        not null,
+    lastname    varchar(100)                        not null,
+    correo      varchar(100)                        not null,
+    password    varchar(100)                        not null,
     idSubNivel  int                                 not null,
     created_at  timestamp default current_timestamp not null,
     updated_at  timestamp default current_timestamp not null
@@ -106,11 +110,11 @@ create table estudiantes
 
 create table notificaciones
 (
-    id           int primary key                     not null,
+    id           int auto_increment primary key      not null,
     idapoderado  int                                 not null,
     idEstudiante int                                 not null,
-    titulo       varchar(50)                         not null,
-    mensaje      varchar(100)                        not null,
+    titulo       varchar(100)                        not null,
+    mensaje      text                                not null,
     date_limit   timestamp default current_timestamp not null,
     created_at   timestamp default current_timestamp not null,
     updated_at   timestamp default current_timestamp not null
@@ -129,6 +133,8 @@ alter table notificaciones
     add constraint idEstudiante_Estudiantes foreign key (idEstudiante) references estudiantes (id)
         on update restrict on delete restrict;
 
+select *
+from tokenSession;
 /*select *
 from estudiantes
 where correo = ?
