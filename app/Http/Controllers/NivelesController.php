@@ -31,8 +31,8 @@ class NivelesController extends Controller
         $idNivel = $request->query('idNivel');
         $checkToken = $jwtAuth->checkToken($token);
         if (is_null($checkToken)) {
-            $subNivel = Niveles::query()->where(array('id' => $idNivel))->first();
-            return response()->json(array('nivel' => $subNivel, 'status' => 'success', 'message' => 'Nivel encontrado', 'code' => 200), 200);
+            $nivel = Niveles::query()->where(array('id' => $idNivel))->first();
+            return response()->json(array('nivel' => $nivel, 'status' => 'success', 'message' => 'Nivel encontrado', 'code' => 200), 200);
         } else {
             return response()->json($checkToken, 200);
         }

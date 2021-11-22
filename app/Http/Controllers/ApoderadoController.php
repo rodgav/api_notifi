@@ -55,6 +55,21 @@ class ApoderadoController extends Controller
         }
     }
 
+    public function getApoderado(Request $request)
+    {
+        $token = $request->header('Authorization', null);
+        $jwtAuth = new JwtAuth();
+        //recuperamos idApoderado
+        $idApoderado = $request->query('idApoderado');
+        $checkToken = $jwtAuth->checkToken($token);
+        if (is_null($checkToken)) {
+            $subNivel = Apoderado::query()->where(array('id' => $idApoderado))->first();
+            return response()->json(array('apoderado' => $subNivel, 'status' => 'success', 'message' => 'Apoderado encontrado', 'code' => 200), 200);
+        } else {
+            return response()->json($checkToken, 200);
+        }
+    }
+
     public function create(Request $request)
     {
         $token = $request->header('Authorization', null);

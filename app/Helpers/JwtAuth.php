@@ -48,7 +48,10 @@ class JwtAuth
 
         if (!is_null($apoderado)) {
 
-            $tokens = TokensSession::query()->where(array('idUser' => $apoderado->id))->count();
+            $tokens = TokensSession::query()
+                ->where('idUser', '=', $apoderado->id)
+                ->where('role', '=', 'proxie')
+                ->count();
 
             if (!is_null($tokens) && $tokens >= 2) {
                 return array('status' => 'error', 'message' => 'Usted ya inicio sesión en dos dispositivos', 'code' => 400, 'jwt' => null);
@@ -76,19 +79,27 @@ class JwtAuth
             ->first();
 
         if (!is_null($estudiante)) {
-            $token = array('sub' => $estudiante->id,
-                'correo' => $estudiante->correo,
-                'iat' => time(),
-                'exp' => time() + (7 * 24 * 60 * 60));
-            $jwt = JWT::encode($token, $this->key, 'HS256');
-            $tokensSession = new TokensSession();
-            $tokensSession->idUser = $estudiante->id;
-            $tokensSession->token = $jwt;
-            $tokensSession->role = 'student';
-            $tokensSession->save();
-            return $jwt;
+            $tokens = TokensSession::query()
+                ->where('idUser', '=', $estudiante->id)
+                ->where('role', '=', 'student')
+                ->count();
+            if (!is_null($tokens) && $tokens >= 2) {
+                return array('status' => 'error', 'message' => 'Usted ya inicio sesión en dos dispositivos', 'code' => 400, 'jwt' => null);
+            } else {
+                $token = array('sub' => $estudiante->id,
+                    'correo' => $estudiante->correo,
+                    'iat' => time(),
+                    'exp' => time() + (7 * 24 * 60 * 60));
+                $jwt = JWT::encode($token, $this->key, 'HS256');
+                $tokensSession = new TokensSession();
+                $tokensSession->idUser = $estudiante->id;
+                $tokensSession->token = $jwt;
+                $tokensSession->role = 'student';
+                $tokensSession->save();
+                return array('status' => 'success', 'message' => 'Login correcto', 'code' => 200, 'jwt' => $jwt);
+            }
         } else {
-            return null;
+            return array('status' => 'error', 'message' => 'Login incorrecto', 'code' => 400, 'jwt' => null);
         }
     }
 
