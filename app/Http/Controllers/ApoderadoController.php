@@ -20,8 +20,9 @@ class ApoderadoController extends Controller
         $params = json_decode($json);
         $correo = (!is_null($json) && isset($params->correo)) ? $params->correo : null;
         $password = (!is_null($json) && isset($params->password)) ? $params->password : null;
+        $token = (!is_null($json) && isset($params->token)) ? $params->token : null;
         if (!is_null($correo) && !is_null($password)) {
-            $sigupAdmin = $jwtAuth->singupApoderado($correo, $password);
+            $sigupAdmin = $jwtAuth->singupApoderado($correo, $password,$token);
             return response()->json($sigupAdmin, 200);
         } else {
             return Response()->json(array('status' => 'error', 'message' => 'Faltan datos', 'code' => 400), 200);

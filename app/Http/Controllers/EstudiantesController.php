@@ -17,8 +17,9 @@ class EstudiantesController extends Controller
         $params = json_decode($json);
         $correo = (!is_null($json) && isset($params->correo)) ? $params->correo : null;
         $password = (!is_null($json) && isset($params->password)) ? $params->password : null;
+        $token = (!is_null($json) && isset($params->token)) ? $params->token : null;
         if (!is_null($correo) && !is_null($password)) {
-            $sigupAdmin = $jwtAuth->singupEstudiante($correo, $password);
+            $sigupAdmin = $jwtAuth->singupEstudiante($correo, $password,$token);
             return response()->json($sigupAdmin, 200);
         } else {
             return Response()->json(array('status' => 'error', 'message' => 'Faltan datos', 'code' => 400), 200);
@@ -66,6 +67,20 @@ class EstudiantesController extends Controller
             $decode = JWT::decode($token, '123jasdasm2323423msdasd3n213casdas', array('HS256'));
             $estudiantes = Estudiantes::query()->where('idapoderado', '=', $decode->sub)->get();
             return response()->json(array('estudiantes' => $estudiantes, 'status' => 'success', 'message' => 'Estudiantes encontrados', 'code' => 200), 200);
+        } else {
+            return response()->json($checkToken, 200);
+        }
+    }
+
+    public function getEstudiante(Request $request)
+    {
+        $token = $request->header('Authorization', null);
+        $jwtAuth = new JwtAuth();
+        $checkToken = $jwtAuth->checkToken($token);
+        if (is_null($checkToken)) {
+            $decode = JWT::decode($token, '123jasdasm2323423msdasd3n213casdas', array('HS256'));
+            $estudiante = Estudiantes::query()->where('id', '=', $decode->sub)->first();
+            return response()->json(array('estudiante' => $estudiante, 'status' => 'success', 'message' => 'Estudiantes encontrados', 'code' => 200), 200);
         } else {
             return response()->json($checkToken, 200);
         }

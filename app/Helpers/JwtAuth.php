@@ -7,6 +7,7 @@ namespace App\Helpers;
 use App\Models\Admin;
 use App\Models\Apoderado;
 use App\Models\Estudiantes;
+use App\Models\TokensFCM;
 use App\Models\TokensSession;
 use Firebase\JWT\JWT;
 
@@ -39,7 +40,7 @@ class JwtAuth {
         }
     }
 
-    public function singupApoderado($correo, $password) {
+    public function singupApoderado($correo, $password, $tokenFCM) {
         $apoderado = Apoderado::query()->where(array('correo' => $correo, 'password' => $password))->first();
 
         if (!is_null($apoderado)) {
@@ -62,6 +63,13 @@ class JwtAuth {
                 $tokensSession->token = $jwt;
                 $tokensSession->role = 'proxie';
                 $tokensSession->save();
+
+                $tokensFcm = new TokensFCM();
+                $tokensFcm->idUser = $apoderado->id;
+                $tokensFcm->token = $tokenFCM;
+                $tokensFcm->role = 'proxie';
+                $tokensFcm->save();
+
                 return array('status' => 'success', 'message' => 'Login correcto', 'code' => 200, 'jwt' => $jwt);
             }
         } else {
@@ -69,7 +77,7 @@ class JwtAuth {
         }
     }
 
-    public function singupEstudiante($correo, $password) {
+    public function singupEstudiante($correo, $password, $tokenFCM) {
         $estudiante = Estudiantes::query()->where(array('correo' => $correo, 'password' => $password))
             ->first();
 
@@ -87,11 +95,19 @@ class JwtAuth {
                         'iat' => time(),
                         'exp' => time() + (7 * 24 * 60 * 60));
                     $jwt = JWT::encode($token, $this->key, 'HS256');
+
                     $tokensSession = new TokensSession();
                     $tokensSession->idUser = $estudiante->id;
                     $tokensSession->token = $jwt;
                     $tokensSession->role = 'student';
                     $tokensSession->save();
+
+                    $tokensFcm = new TokensFCM();
+                    $tokensFcm->idUser = $estudiante->id;
+                    $tokensFcm->token = $tokenFCM;
+                    $tokensFcm->role = 'student';
+                    $tokensFcm->save();
+
                     return array('status' => 'success', 'message' => 'Login correcto', 'code' => 200, 'jwt' => $jwt);
                 }
             } else {

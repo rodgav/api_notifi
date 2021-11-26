@@ -7,10 +7,8 @@ use App\Models\Estudiantes;
 use App\Models\Notificaciones;
 use Illuminate\Http\Request;
 
-class NotificacionesController extends Controller
-{
-    public function notificacionesAll(Request $request)
-    {
+class NotificacionesController extends Controller {
+    public function notificacionesAll(Request $request) {
         //recibir datos
         $json = $request->input('json', null);
         $params = json_decode($json);
@@ -20,21 +18,17 @@ class NotificacionesController extends Controller
         if (!is_null($titulo) && !is_null($mensaje) && !is_null($date_limit)) {
             $tokensStudents = Estudiantes::query()
                 ->join('apoderado', 'apoderado.id', '=', 'estudiantes.idapoderado')
-                //->join('tokensFCM', 'tokensFCM.idUser', '=', 'apoderado.id')
+                ->join('tokensfcm', 'tokensfcm.idUser', '=', 'apoderado.id')
                 ->where('estudiantes.idapoderado', '=', 0)
-                //->where('tokensFCM.role', '=', 'student')
-                ->select('apoderado.id as idApoderado', 'estudiantes.id as idEstudiante'
-                //,'tokensFCM.token'
-                )
+                ->where('tokensfcm.role', '=', 'student')
+                ->select('apoderado.id as idApoderado', 'estudiantes.id as idEstudiante', 'tokensfcm.token as token')
                 ->get();
             $tokensProxies = Estudiantes::query()
                 ->join('apoderado', 'apoderado.id', '=', 'estudiantes.idapoderado')
-                //->join('tokensFCM', 'tokensFCM.idUser', '=', 'apoderado.id')
+                ->join('tokensfcm', 'tokensfcm.idUser', '=', 'apoderado.id')
                 ->where('estudiantes.idapoderado', '!=', 0)
-                //->where('tokensFCM.role', '=', 'proxie')
-                ->select('apoderado.id as idApoderado', 'estudiantes.id as idEstudiante'
-                //,'tokensFCM.token'
-                )
+                ->where('tokensfcm.role', '=', 'proxie')
+                ->select('apoderado.id as idApoderado', 'estudiantes.id as idEstudiante', 'tokensfcm.token as token')
                 ->get();
             foreach ($tokensStudents as $val) {
                 Notificaciones::query()->insert([
@@ -44,6 +38,7 @@ class NotificacionesController extends Controller
                     'mensaje' => $mensaje,
                     'date_limit' => $date_limit,
                 ]);
+                $this->sendNotificaciones($titulo, $val->token, $date_limit, $mensaje);
             }
             foreach ($tokensProxies as $val) {
                 Notificaciones::query()->insert([
@@ -53,6 +48,7 @@ class NotificacionesController extends Controller
                     'mensaje' => $mensaje,
                     'date_limit' => $date_limit,
                 ]);
+                $this->sendNotificaciones($titulo, $val->token, $date_limit, $mensaje);
             }
             return response()->json(array('notiAllS' => $tokensStudents, 'notiAllA' => $tokensProxies, 'status' => 'success', 'message' => 'Estudiantes encontrados', 'code' => 200), 200);
         } else {
@@ -60,8 +56,7 @@ class NotificacionesController extends Controller
         }
     }
 
-    public function notificacionesGrades(Request $request, $idSubNivel)
-    {
+    public function notificacionesGrades(Request $request, $idSubNivel) {
         //recibir datos
         $json = $request->input('json', null);
         $params = json_decode($json);
@@ -71,23 +66,19 @@ class NotificacionesController extends Controller
         if (!is_null($titulo) && !is_null($mensaje) && !is_null($date_limit)) {
             $tokensStudents = Estudiantes::query()
                 ->join('apoderado', 'apoderado.id', '=', 'estudiantes.idapoderado')
-                //->join('tokensFCM', 'tokensFCM.idUser', '=', 'apoderado.id')
+                ->join('tokensfcm', 'tokensfcm.idUser', '=', 'apoderado.id')
                 ->where('estudiantes.idapoderado', '=', 0)
                 ->where('estudiantes.idSubNivel', '=', $idSubNivel)
-                //->where('tokensFCM.role', '=', 'student')
-                ->select('apoderado.id as idApoderado', 'estudiantes.id as idEstudiante'
-                //,'tokensFCM.token'
-                )
+                ->where('tokensfcm.role', '=', 'student')
+                ->select('apoderado.id as idApoderado', 'estudiantes.id as idEstudiante', 'tokensfcm.token as token')
                 ->get();
             $tokensProxies = Estudiantes::query()
                 ->join('apoderado', 'apoderado.id', '=', 'estudiantes.idapoderado')
-                //->join('tokensFCM', 'tokensFCM.idUser', '=', 'apoderado.id')
+                ->join('tokensfcm', 'tokensfcm.idUser', '=', 'apoderado.id')
                 ->where('estudiantes.idapoderado', '!=', 0)
                 ->where('estudiantes.idSubNivel', '=', $idSubNivel)
-                //->where('tokensFCM.role', '=', 'proxie')
-                ->select('apoderado.id as idApoderado', 'estudiantes.id as idEstudiante'
-                //,'tokensFCM.token'
-                )
+                ->where('tokensfcm.role', '=', 'proxie')
+                ->select('apoderado.id as idApoderado', 'estudiantes.id as idEstudiante', 'tokensfcm.token as token')
                 ->get();
             foreach ($tokensStudents as $val) {
                 Notificaciones::query()->insert([
@@ -97,6 +88,7 @@ class NotificacionesController extends Controller
                     'mensaje' => $mensaje,
                     'date_limit' => $date_limit,
                 ]);
+                $this->sendNotificaciones($titulo, $val->token, $date_limit, $mensaje);
             }
             foreach ($tokensProxies as $val) {
                 Notificaciones::query()->insert([
@@ -106,6 +98,7 @@ class NotificacionesController extends Controller
                     'mensaje' => $mensaje,
                     'date_limit' => $date_limit,
                 ]);
+                $this->sendNotificaciones($titulo, $val->token, $date_limit, $mensaje);
             }
             return response()->json(array('notiGradeS' => $tokensStudents, 'notiGradeA' => $tokensProxies, 'status' => 'success', 'message' => 'Estudiantes encontrados', 'code' => 200), 200);
         } else {
@@ -113,8 +106,7 @@ class NotificacionesController extends Controller
         }
     }
 
-    public function getNotificaciones(Request $request)
-    {
+    public function getNotificaciones(Request $request) {
         $token = $request->header('Authorization', null);
         $jwtAuth = new JwtAuth();
         //recuperamos idNivel
@@ -123,15 +115,15 @@ class NotificacionesController extends Controller
         if (is_null($checkToken)) {
             $notif = Notificaciones::query()
                 ->where(array('idEstudiante' => $idEstudiante))
-                ->orderBy('created_at','desc')
+                ->orderBy('created_at', 'desc')
                 ->get();
             return response()->json(array('notificaciones' => $notif, 'status' => 'success', 'message' => 'Notificaciones encontradas', 'code' => 200), 200);
         } else {
             return response()->json($checkToken, 200);
         }
     }
-    public function getNotificacionesProximas(Request $request)
-    {
+
+    public function getNotificacionesProximas(Request $request) {
         $token = $request->header('Authorization', null);
         $jwtAuth = new JwtAuth();
         //recuperamos idNivel
@@ -140,11 +132,45 @@ class NotificacionesController extends Controller
         if (is_null($checkToken)) {
             $notif = Notificaciones::query()
                 ->where(array('idEstudiante' => $idEstudiante))
-                ->orderBy('date_limit','asc')
+                ->orderBy('date_limit', 'asc')
                 ->get();
             return response()->json(array('notificaciones' => $notif, 'status' => 'success', 'message' => 'Notificaciones encontradas', 'code' => 200), 200);
         } else {
             return response()->json($checkToken, 200);
         }
     }
+
+    public function sendNotificaciones($titulo, $token, $fecha, $mensaje) {
+        define('GOOGLE_API_KEY', 'AAAAtQK7CP4:APA91bEXot7USXGOGwpgTN5E3Pvb9yy6Thx-jIDcPazfrFiDSyq8Ux6EasHF1k4kEO8EE5KuSEz8t4UDy5PrEaBWte_xXC1SVmRlja-tarULZBK_XWVAryXLfyYrJ6-YGQGDlVHBb5LI');
+        //print($token);
+        ignore_user_abort();
+        ob_start();
+
+        $url = 'https://fcm.googleapis.com/fcm/send';
+
+        $fields = array('to' => $token,
+            'notification' => array('title' => $titulo, 'body' => $mensaje),
+            'data' => array('titulo' => $titulo, 'fecha' => $fecha, 'mensaje' => $mensaje,
+                'click_action' => 'FLUTTER_NOTIFICATION_CLICK'));
+
+
+        $headers = array(
+            'Authorization:key=' . GOOGLE_API_KEY,
+            'Content-Type: application/json'
+        );
+
+        $ch = curl_init();
+        curl_setopt($ch, CURLOPT_URL, $url);
+        curl_setopt($ch, CURLOPT_POST, true);
+        curl_setopt($ch, CURLOPT_HTTPHEADER, $headers);
+        curl_setopt($ch, CURLOPT_SSL_VERIFYPEER, false);
+        curl_setopt($ch, CURLOPT_POSTFIELDS, json_encode($fields));
+        curl_setopt($ch, CURLOPT_RETURNTRANSFER, true);
+        $result = curl_exec($ch);
+        if ($result === false)
+            die('Curl failed ' . curl_error($ch));
+        curl_close($ch);
+        //return $result;
+    }
+
 }

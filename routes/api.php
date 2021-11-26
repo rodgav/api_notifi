@@ -37,6 +37,7 @@ Route::get('subnivel', [Sub_NivelController::class, 'getSubNivel']);
 Route::get('estudiantesNoApoderado', [EstudiantesController::class, 'getEstudiantesNoApoderado']);
 Route::get('estudiantesApoderado', [EstudiantesController::class, 'getEstudiantesApoderado']);
 Route::get('estudiantesForApoderado', [EstudiantesController::class, 'getEstudiantesForApoderado']);
+Route::get('estudiante', [EstudiantesController::class, 'getEstudiante']);
 Route::post('estudiante', [EstudiantesController::class, 'create']);
 Route::put('estudiante/{id}', [EstudiantesController::class, 'update']);
 Route::get('apoderados', [ApoderadoController::class, 'getApoderados']);
