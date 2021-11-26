@@ -19,10 +19,7 @@ class EstudiantesController extends Controller
         $password = (!is_null($json) && isset($params->password)) ? $params->password : null;
         if (!is_null($correo) && !is_null($password)) {
             $sigupAdmin = $jwtAuth->singupEstudiante($correo, $password);
-            if (!is_null($sigupAdmin)) {
-                return response()->json(array('token' => $sigupAdmin), 200);
-            }
-            return Response()->json(array('status' => 'error', 'message' => 'Login incorrecto', 'code' => 400), 200);
+            return response()->json($sigupAdmin, 200);
         } else {
             return Response()->json(array('status' => 'error', 'message' => 'Faltan datos', 'code' => 400), 200);
         }
@@ -36,6 +33,7 @@ class EstudiantesController extends Controller
         $checkToken = $jwtAuth->checkToken($token);
         if (is_null($checkToken)) {
             $estudiantes = Estudiantes::query()->where('idapoderado', '=', 0)
+                ->with('apoderado')
                 ->where('idSubNivel', '=', $idSubNivel)->get();
             return response()->json(array('estudiantes' => $estudiantes, 'status' => 'success', 'message' => 'Estudiantes encontrados', 'code' => 200), 200);
         } else {
@@ -45,11 +43,14 @@ class EstudiantesController extends Controller
 
     public function getEstudiantesApoderado(Request $request)
     {
+        $idSubNivel = $request->query('idSubNivel');
         $token = $request->header('Authorization', null);
         $jwtAuth = new JwtAuth();
         $checkToken = $jwtAuth->checkToken($token);
         if (is_null($checkToken)) {
-            $estudiantes = Estudiantes::query()->where('idapoderado', '!=', 0)->get();
+            $estudiantes = Estudiantes::query()->where('idapoderado', '!=', 0)
+                ->with('apoderado')
+                ->where('idSubNivel', '=', $idSubNivel)->get();
             return response()->json(array('estudiantes' => $estudiantes, 'status' => 'success', 'message' => 'Estudiantes encontrados', 'code' => 200), 200);
         } else {
             return response()->json($checkToken, 200);

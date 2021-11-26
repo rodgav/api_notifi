@@ -21,4 +21,8 @@ class Estudiantes extends Model
         return $this->belongsTo('App\Models\Sub_Nivel', 'idSubNivel');
     }
 
+    protected $hidden = [
+        'password'
+    ];
+
 }

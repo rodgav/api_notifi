@@ -10,22 +10,19 @@ use App\Models\Estudiantes;
 use App\Models\TokensSession;
 use Firebase\JWT\JWT;
 
-class JwtAuth
-{
+class JwtAuth {
     public $key;
 
     /**
      * JwtAuth constructor.
      * @param $key
      */
-    public function __construct()
-    {
+    public function __construct() {
         $this->key = '123jasdasm2323423msdasd3n213casdas';
     }
 
 
-    public function singupAdmin($correo, $password)
-    {
+    public function singupAdmin($correo, $password) {
         $admin = Admin::query()->where(array('correo' => $correo, 'password' => $password))->first();
 
         if (!is_null($admin)) {
@@ -42,8 +39,7 @@ class JwtAuth
         }
     }
 
-    public function singupApoderado($correo, $password)
-    {
+    public function singupApoderado($correo, $password) {
         $apoderado = Apoderado::query()->where(array('correo' => $correo, 'password' => $password))->first();
 
         if (!is_null($apoderado)) {
@@ -73,38 +69,40 @@ class JwtAuth
         }
     }
 
-    public function singupEstudiante($correo, $password)
-    {
-        $estudiante = Estudiantes::query()->where(array('correo' => $correo, 'password' => $password, 'idapoderado' => 0))
+    public function singupEstudiante($correo, $password) {
+        $estudiante = Estudiantes::query()->where(array('correo' => $correo, 'password' => $password))
             ->first();
 
         if (!is_null($estudiante)) {
-            $tokens = TokensSession::query()
-                ->where('idUser', '=', $estudiante->id)
-                ->where('role', '=', 'student')
-                ->count();
-            if (!is_null($tokens) && $tokens >= 2) {
-                return array('status' => 'error', 'message' => 'Usted ya inicio sesión en dos dispositivos', 'code' => 400, 'jwt' => null);
+            if ($estudiante->idapoderado == 0) {
+                $tokens = TokensSession::query()
+                    ->where('idUser', '=', $estudiante->id)
+                    ->where('role', '=', 'student')
+                    ->count();
+                if (!is_null($tokens) && $tokens >= 2) {
+                    return array('status' => 'error', 'message' => 'Usted ya inicio sesión en dos dispositivos', 'code' => 400, 'jwt' => null);
+                } else {
+                    $token = array('sub' => $estudiante->id,
+                        'correo' => $estudiante->correo,
+                        'iat' => time(),
+                        'exp' => time() + (7 * 24 * 60 * 60));
+                    $jwt = JWT::encode($token, $this->key, 'HS256');
+                    $tokensSession = new TokensSession();
+                    $tokensSession->idUser = $estudiante->id;
+                    $tokensSession->token = $jwt;
+                    $tokensSession->role = 'student';
+                    $tokensSession->save();
+                    return array('status' => 'success', 'message' => 'Login correcto', 'code' => 200, 'jwt' => $jwt);
+                }
             } else {
-                $token = array('sub' => $estudiante->id,
-                    'correo' => $estudiante->correo,
-                    'iat' => time(),
-                    'exp' => time() + (7 * 24 * 60 * 60));
-                $jwt = JWT::encode($token, $this->key, 'HS256');
-                $tokensSession = new TokensSession();
-                $tokensSession->idUser = $estudiante->id;
-                $tokensSession->token = $jwt;
-                $tokensSession->role = 'student';
-                $tokensSession->save();
-                return array('status' => 'success', 'message' => 'Login correcto', 'code' => 200, 'jwt' => $jwt);
+                return array('status' => 'error', 'message' => 'El estudiante tiene un apoderado asociado', 'code' => 400, 'jwt' => null);
             }
         } else {
-            return array('status' => 'error', 'message' => 'Login incorrecto', 'code' => 400, 'jwt' => null);
+            return array('status' => 'error', 'message' => 'Usuario y/o contraseña incorrectos', 'code' => 400, 'jwt' => null);
         }
     }
 
-    public function checkToken($jwt): ?array
-    {
+    public function checkToken($jwt): ?array {
         try {
             $decode = JWT::decode($jwt, $this->key, array('HS256'));
             if (is_object($decode) && isset($decode->sub)) {
@@ -117,18 +115,17 @@ class JwtAuth
                         return null;
                     }
                 } else {
-                    return array('status' => 'error', 'message' => 'Token no encontrado', 'code' => 400);
+                    return array('status' => 'error', 'message' => 'Token no encontrado', 'code' => 401);
                 }
             } else {
-                return array('status' => 'error', 'message' => 'Token invalido', 'code' => 400);
+                return array('status' => 'error', 'message' => 'Token invalido', 'code' => 401);
             }
         } catch (\UnexpectedValueException | \DomainException $e) {
-            return array('status' => 'error', 'message' => 'Token invalido', 'code' => 400);
+            return array('status' => 'error', 'message' => 'Token invalido', 'code' => 401);
         }
     }
 
-    public function refresh($jwt): array
-    {
+    public function refresh($jwt): array {
         try {
             $decode = JWT::decode($jwt, $this->key, array('HS256'));
             if (is_object($decode) && isset($decode->sub)) {
@@ -142,14 +139,14 @@ class JwtAuth
                     TokensSession::query()->where(array('token' => $jwt))->update(['idUser' => $decode->sub, 'token' => $jwtRefresh]);
                     return array('status' => 'success', 'message' => 'Token refrescado', 'code' => 200, 'jwt' => $jwtRefresh);
                 } else {
-                    return array('status' => 'error', 'message' => 'Token no encontrado', 'code' => 400, 'jwt' => null);
+                    return array('status' => 'error', 'message' => 'Token no encontrado', 'code' => 401, 'jwt' => null);
                 }
             } else {
-                return array('status' => 'error', 'message' => 'Token invalido', 'code' => 400, 'jwt' => null);
+                return array('status' => 'error', 'message' => 'Token invalido', 'code' => 401, 'jwt' => null);
 
             }
         } catch (\UnexpectedValueException | \DomainException $e) {
-            return array('status' => 'error', 'message' => 'Token invalido', 'code' => 400, 'jwt' => null);
+            return array('status' => 'error', 'message' => 'Token invalido', 'code' => 401, 'jwt' => null);
         }
     }
 }

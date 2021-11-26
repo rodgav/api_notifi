@@ -28,12 +28,11 @@ insert into apoderado (id, name, lastname, correo, password)
 VALUES (1, 'Katia', 'Garcia', 'katia@gmail.com', '12345678');
 
 insert into apoderado (id, name, lastname, correo, password)
-VALUES (3, 'Alejandra', 'Gonzales', 'alejandra@gmail.com', '12345678');
+VALUES (2, 'Apoderado Prueba', 'Apoderado Prueba', 'prueba_apoderado@gmail.com', '12345678');
 
 insert into apoderado (id, name, lastname, correo, password)
-VALUES (2, 'Apoderado Prueba', 'Apoderado Prueba', 'prueba_apoderado@gmail.com', '12345678');
-insert into apoderado (id, name, lastname, correo, password)
 VALUES (3, 'Alejandra', 'Gonzales', 'alejandra@gmail.com', '12345678');
+
 create table tokensFCM
 (
     idUser     int                                 not null,
