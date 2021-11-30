@@ -7,6 +7,8 @@ use App\Models\Estudiantes;
 use App\Models\Notificaciones;
 use Illuminate\Http\Request;
 
+define('GOOGLE_API_KEY', 'AAAAtQK7CP4:APA91bEXot7USXGOGwpgTN5E3Pvb9yy6Thx-jIDcPazfrFiDSyq8Ux6EasHF1k4kEO8EE5KuSEz8t4UDy5PrEaBWte_xXC1SVmRlja-tarULZBK_XWVAryXLfyYrJ6-YGQGDlVHBb5LI');
+
 class NotificacionesController extends Controller {
     public function notificacionesAll(Request $request) {
         //recibir datos
@@ -22,6 +24,7 @@ class NotificacionesController extends Controller {
                 ->where('estudiantes.idapoderado', '=', 0)
                 ->where('tokensfcm.role', '=', 'student')
                 ->select('apoderado.id as idApoderado', 'estudiantes.id as idEstudiante', 'tokensfcm.token as token')
+                ->groupBy('apoderado.id','estudiantes.id','tokensfcm.token')
                 ->get();
             $tokensProxies = Estudiantes::query()
                 ->join('apoderado', 'apoderado.id', '=', 'estudiantes.idapoderado')
@@ -29,6 +32,7 @@ class NotificacionesController extends Controller {
                 ->where('estudiantes.idapoderado', '!=', 0)
                 ->where('tokensfcm.role', '=', 'proxie')
                 ->select('apoderado.id as idApoderado', 'estudiantes.id as idEstudiante', 'tokensfcm.token as token')
+                ->groupBy('apoderado.id','estudiantes.id','tokensfcm.token')
                 ->get();
             foreach ($tokensStudents as $val) {
                 Notificaciones::query()->insert([
@@ -71,6 +75,7 @@ class NotificacionesController extends Controller {
                 ->where('estudiantes.idSubNivel', '=', $idSubNivel)
                 ->where('tokensfcm.role', '=', 'student')
                 ->select('apoderado.id as idApoderado', 'estudiantes.id as idEstudiante', 'tokensfcm.token as token')
+                ->groupBy('apoderado.id','estudiantes.id','tokensfcm.token')
                 ->get();
             $tokensProxies = Estudiantes::query()
                 ->join('apoderado', 'apoderado.id', '=', 'estudiantes.idapoderado')
@@ -79,6 +84,7 @@ class NotificacionesController extends Controller {
                 ->where('estudiantes.idSubNivel', '=', $idSubNivel)
                 ->where('tokensfcm.role', '=', 'proxie')
                 ->select('apoderado.id as idApoderado', 'estudiantes.id as idEstudiante', 'tokensfcm.token as token')
+                ->groupBy('apoderado.id','estudiantes.id','tokensfcm.token')
                 ->get();
             foreach ($tokensStudents as $val) {
                 Notificaciones::query()->insert([
@@ -141,7 +147,6 @@ class NotificacionesController extends Controller {
     }
 
     public function sendNotificaciones($titulo, $token, $fecha, $mensaje) {
-        define('GOOGLE_API_KEY', 'AAAAtQK7CP4:APA91bEXot7USXGOGwpgTN5E3Pvb9yy6Thx-jIDcPazfrFiDSyq8Ux6EasHF1k4kEO8EE5KuSEz8t4UDy5PrEaBWte_xXC1SVmRlja-tarULZBK_XWVAryXLfyYrJ6-YGQGDlVHBb5LI');
         //print($token);
         ignore_user_abort();
         ob_start();
