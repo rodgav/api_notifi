@@ -68,6 +68,40 @@ class NotificacionesController extends Controller {
         $mensaje = (!is_null($json) && isset($params->mensaje)) ? $params->mensaje : null;
         $date_limit = (!is_null($json) && isset($params->date_limit)) ? $params->date_limit : null;
         if (!is_null($titulo) && !is_null($mensaje) && !is_null($date_limit)) {
+            $students = Estudiantes::query()
+                ->join('apoderado', 'apoderado.id', '=', 'estudiantes.idapoderado')
+                ->where('estudiantes.idapoderado', '=', 0)
+                ->where('estudiantes.idSubNivel', '=', $idSubNivel)
+                ->select('apoderado.id as idApoderado', 'estudiantes.id as idEstudiante')
+                ->groupBy('apoderado.id','estudiantes.id')
+                ->get();
+            $proxies = Estudiantes::query()
+                ->join('apoderado', 'apoderado.id', '=', 'estudiantes.idapoderado')
+                ->where('estudiantes.idapoderado', '!=', 0)
+                ->where('estudiantes.idSubNivel', '=', $idSubNivel)
+                ->select('apoderado.id as idApoderado', 'estudiantes.id as idEstudiante')
+                ->groupBy('apoderado.id','estudiantes.id')
+                ->get();
+
+            foreach ($students as $val) {
+                Notificaciones::query()->insert([
+                    'idapoderado' => $val->idApoderado,
+                    'idEstudiante' => $val->idEstudiante,
+                    'titulo' => $titulo,
+                    'mensaje' => $mensaje,
+                    'date_limit' => $date_limit,
+                ]);
+            }
+            foreach ($proxies as $val) {
+                Notificaciones::query()->insert([
+                    'idapoderado' => $val->idApoderado,
+                    'idEstudiante' => $val->idEstudiante,
+                    'titulo' => $titulo,
+                    'mensaje' => $mensaje,
+                    'date_limit' => $date_limit,
+                ]);
+            }
+
             $tokensStudents = Estudiantes::query()
                 ->join('apoderado', 'apoderado.id', '=', 'estudiantes.idapoderado')
                 ->join('tokensfcm', 'tokensfcm.idUser', '=', 'apoderado.id')
@@ -87,23 +121,10 @@ class NotificacionesController extends Controller {
                 ->groupBy('apoderado.id','estudiantes.id','tokensfcm.token')
                 ->get();
             foreach ($tokensStudents as $val) {
-                Notificaciones::query()->insert([
-                    'idapoderado' => $val->idApoderado,
-                    'idEstudiante' => $val->idEstudiante,
-                    'titulo' => $titulo,
-                    'mensaje' => $mensaje,
-                    'date_limit' => $date_limit,
-                ]);
+
                 $this->sendNotificaciones($titulo, $val->token, $date_limit, $mensaje);
             }
             foreach ($tokensProxies as $val) {
-                Notificaciones::query()->insert([
-                    'idapoderado' => $val->idApoderado,
-                    'idEstudiante' => $val->idEstudiante,
-                    'titulo' => $titulo,
-                    'mensaje' => $mensaje,
-                    'date_limit' => $date_limit,
-                ]);
                 $this->sendNotificaciones($titulo, $val->token, $date_limit, $mensaje);
             }
             return response()->json(array('notiGradeS' => $tokensStudents, 'notiGradeA' => $tokensProxies, 'status' => 'success', 'message' => 'Estudiantes encontrados', 'code' => 200), 200);
