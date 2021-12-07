@@ -82,7 +82,6 @@ class NotificacionesController extends Controller {
                 ->select('apoderado.id as idApoderado', 'estudiantes.id as idEstudiante')
                 ->groupBy('apoderado.id','estudiantes.id')
                 ->get();
-
             foreach ($students as $val) {
                 Notificaciones::query()->insert([
                     'idapoderado' => $val->idApoderado,
@@ -101,7 +100,6 @@ class NotificacionesController extends Controller {
                     'date_limit' => $date_limit,
                 ]);
             }
-
             $tokensStudents = Estudiantes::query()
                 ->join('apoderado', 'apoderado.id', '=', 'estudiantes.idapoderado')
                 ->join('tokensfcm', 'tokensfcm.idUser', '=', 'apoderado.id')
@@ -121,7 +119,6 @@ class NotificacionesController extends Controller {
                 ->groupBy('apoderado.id','estudiantes.id','tokensfcm.token')
                 ->get();
             foreach ($tokensStudents as $val) {
-
                 $this->sendNotificaciones($titulo, $val->token, $date_limit, $mensaje);
             }
             foreach ($tokensProxies as $val) {

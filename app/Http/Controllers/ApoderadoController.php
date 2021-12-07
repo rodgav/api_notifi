@@ -49,7 +49,10 @@ class ApoderadoController extends Controller
         $jwtAuth = new JwtAuth();
         $checkToken = $jwtAuth->checkToken($token);
         if (is_null($checkToken)) {
-            $apoderados = Apoderado::query()->where('lastname', 'like', '%' . $lastName . '%')->where('correo', '!=', '')->get();
+            $apoderados = Apoderado::query()
+                ->where('lastname', 'like', '%' . $lastName . '%')
+                ->orWhere('name','like','%' . $lastName . '%')
+                ->where('correo', '!=', '')->get();
             return response()->json(array('apoderados' => $apoderados, 'status' => 'success', 'message' => 'Apoderados encontrados', 'code' => 200), 200);
         } else {
             return response()->json($checkToken, 200);
